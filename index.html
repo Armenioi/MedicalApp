@@ -2,8 +2,8 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Medical Study Hub — Cloud Sync</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Medical Study Hub — Pro</title>
     <style>
         :root {
             --bg-main: #0b0c10;       
@@ -29,208 +29,196 @@
             overflow: hidden;
         }
 
-        /* СИДБАР */
+        /* --- Окно авторизации --- */
+        #auth-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: var(--bg-main); z-index: 9999;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .auth-card {
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            padding: 30px; border-radius: 8px; width: 90%; max-width: 360px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5); text-align: center; box-sizing: border-box;
+        }
+
+        /* --- Мобильный хедер и вкладки --- */
+        .mobile-header {
+            display: none;
+            background-color: #12171e;
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 20px;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 50;
+        }
+        .burger-btn {
+            background: none; border: none; color: var(--bright-green);
+            font-size: 24px; cursor: pointer; padding: 0;
+        }
+        .mobile-tabs {
+            display: none;
+            grid-template-columns: 1fr 1fr;
+            background-color: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+        }
+        .tab-btn {
+            background: none; border: none; color: var(--text-muted);
+            padding: 12px; font-size: 14px; font-weight: bold; cursor: pointer;
+            border-bottom: 2px solid transparent; transition: 0.2s;
+        }
+        .tab-btn.active {
+            color: var(--bright-green); border-bottom: 2px solid var(--bright-green);
+        }
+
+        /* --- Сидбар --- */
         .sidebar {
             background-color: #12171e;
             border-right: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
+            display: flex; flex-direction: column;
             padding: 25px 0 0 0;
-            overflow: hidden;
-            position: relative;
+            overflow: hidden; z-index: 100;
         }
-
         .sidebar h1 {
-            font-size: 18px;
-            color: var(--bright-green);
-            text-align: center;
-            margin-bottom: 25px;
-            letter-spacing: 1px;
-            padding: 0 15px;
+            font-size: 18px; color: var(--bright-green); text-align: center;
+            margin-bottom: 25px; letter-spacing: 1px; padding: 0 15px;
         }
-
-        .sidebar-scroll-area {
-            flex: 1;
-            overflow-y: auto;
-            padding-bottom: 80px; 
-        }
-
+        .sidebar-scroll-area { flex: 1; overflow-y: auto; padding-bottom: 120px; }
         .category-group { margin-bottom: 25px; }
-        .group-title {
-            font-size: 11px;
-            text-transform: uppercase;
-            color: var(--accent-green);
-            padding: 0 25px;
-            margin-bottom: 12px;
-            letter-spacing: 1.5px;
-        }
-
-        /* ИЕРАРХИЯ: ПРЕДМЕТЫ И ПАПКИ */
-        .subject-container { margin-bottom: 5px; }
+        .group-title { font-size: 11px; text-transform: uppercase; color: var(--accent-green); padding: 0 25px; margin-bottom: 12px; letter-spacing: 1.5px; }
         
-        .subject-header, .folder-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 15px 10px 25px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
+        .subject-container { margin-bottom: 5px; }
+        .subject-header, .folder-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 15px 10px 25px; cursor: pointer; transition: background 0.2s; }
         .subject-header:hover, .folder-header:hover { background-color: rgba(255,255,255,0.02); }
         .subject-header.active { background-color: var(--bg-card); color: #fff; border-left: 3px solid var(--bright-green); }
-        
-        .subject-title, .folder-title {
-            font-size: 14px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex: 1;
-        }
+        .subject-title, .folder-title { font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 8px; flex: 1; }
         
         .folder-list { padding-left: 15px; display: none; }
         .folder-list.expanded { display: block; }
-        
         .folder-header { padding-top: 8px; padding-bottom: 8px; color: #a5b1c2; }
         .folder-header.active { color: var(--bright-green); font-weight: bold; }
         
-        .badge {
-            background: var(--border-color);
-            padding: 2px 6px;
-            border-radius: 10px;
-            font-size: 11px;
-            color: var(--accent-green);
-        }
-
-        .btn-del-node {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            font-size: 14px;
-            padding: 0 5px;
-        }
+        .badge { background: var(--border-color); padding: 2px 6px; border-radius: 10px; font-size: 11px; color: var(--accent-green); }
+        .btn-del-node { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 14px; padding: 0 5px; }
         .btn-del-node:hover { color: var(--danger-red); }
 
-        /* ФОРМЫ УПРАВЛЕНИЯ СИДБАРОМ */
-        .manager-inline {
-            padding: 0 25px;
-            margin-top: 8px;
-            display: flex;
-            gap: 6px;
-        }
-        .manager-inline input, .manager-inline select { padding: 6px 10px; font-size: 12px; background-color: var(--bg-input); color: #fff; border: 1px solid var(--border-color); border-radius: 4px; outline: none; }
-        .manager-inline button { padding: 6px 12px; font-size: 12px; border-radius: 4px; background-color: var(--accent-green); color: var(--bg-main); font-weight: bold; cursor: pointer; border: none; }
-        .manager-inline button:hover { background-color: var(--bright-green); }
+        .manager-inline { padding: 0 25px; margin-top: 8px; display: flex; gap: 6px; }
+        .manager-inline input, .manager-inline select { padding: 6px 10px; font-size: 12px; background-color: var(--bg-input); }
+        .manager-inline button { padding: 6px 12px; font-size: 12px; border-radius: 4px; }
 
-        /* НИЖНЯЯ ПАНЕЛЬ СТАТИСТИКИ */
         .sidebar-footer {
-            background-color: #0e1218;
-            border-top: 1px solid var(--border-color);
-            padding: 15px 25px;
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            box-sizing: border-box;
+            background-color: #0e1218; border-top: 1px solid var(--border-color);
+            padding: 10px 25px; display: flex; flex-direction: column; gap: 8px;
+            position: absolute; bottom: 0; width: 320px; box-sizing: border-box;
         }
-        .stats-trigger {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: var(--bright-green);
-            background: none;
-            border: none;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-            text-align: left;
-            padding: 0;
+        .stats-trigger { display: flex; align-items: center; gap: 10px; color: var(--bright-green); background: none; border: none; font-size: 14px; font-weight: bold; cursor: pointer; width: 100%; text-align: left; }
+        
+        /* Затемнение при открытом меню на телефоне */
+        #sidebar-backdrop {
+            display: none; position: fixed; top:0; left:0; width:100vw; height:100vh;
+            background: rgba(0,0,0,0.6); z-index: 90;
         }
-        .stats-trigger:hover { opacity: 0.8; }
 
-        /* ГЛАВНЫЙ КОНТЕНТ */
+        /* --- Главный контент --- */
         .main-content { padding: 35px; overflow-y: auto; display: grid; grid-template-columns: 1.1fr 1fr; gap: 25px; }
-
         .card { background-color: var(--bg-card); border-radius: 8px; border: 1px solid var(--border-color); padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); display: flex; flex-direction: column; margin-bottom: 25px; }
         h2 { margin-top: 0; font-size: 18px; color: #fff; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 20px; }
-        .form-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
         
-        input, select, button, textarea { background-color: var(--bg-input); border: 1px solid var(--border-color); color: #fff; padding: 12px; border-radius: 4px; font-size: 14px; outline: none; }
+        .form-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+        input, select, button, textarea { background-color: var(--bg-input); border: 1px solid var(--border-color); color: #fff; padding: 12px; border-radius: 4px; font-size: 14px; outline: none; width: 100%; box-sizing: border-box;}
         textarea { resize: vertical; font-family: inherit; }
         input:focus, select:focus, textarea:focus { border-color: var(--bright-green); }
-
         button { background-color: var(--accent-green); color: var(--bg-main); font-weight: bold; cursor: pointer; border: none; transition: background 0.2s; }
         button:hover { background-color: var(--bright-green); }
 
-        /* ЭЛЕКТРОННАЯ ПОЛКА */
         .book-item { background-color: var(--bg-main); border: 1px solid var(--border-color); padding: 12px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .book-info span { display: block; font-size: 14px; }
         .book-info .subject-tag { font-size: 11px; color: var(--accent-green); margin-top: 4px; }
-        
         .actions-box { display: flex; gap: 6px; }
         .btn-open { color: var(--bright-green); text-decoration: none; font-size: 13px; border: 1px solid var(--accent-green); padding: 5px 12px; border-radius: 4px; display: inline-block; }
         .btn-open:hover { background: var(--accent-green); color: var(--bg-main); }
-        .btn-edit-q { border: 1px solid var(--warning-orange); color: var(--warning-orange); background: none; font-size: 13px; padding: 5px 10px; border-radius: 4px; cursor: pointer;}
+        .btn-edit-q { border: 1px solid var(--warning-orange); color: var(--warning-orange); background: none; font-size: 13px; padding: 5px 10px; border-radius: 4px; }
         .btn-edit-q:hover { background: var(--warning-orange); color: #000; }
-        .btn-delete { background: none; border: 1px solid var(--danger-red); color: var(--danger-red); padding: 5px 10px; font-size: 13px; border-radius: 4px; cursor: pointer;}
+        .btn-delete { background: none; border: 1px solid var(--danger-red); color: var(--danger-red); padding: 5px 10px; font-size: 13px; border-radius: 4px; }
         .btn-delete:hover { background: var(--danger-red); color: #fff; }
 
-        /* ТЕСТЫ */
-        .quiz-option {
-            background-color: var(--bg-main);
-            border: 1px solid var(--border-color);
-            padding: 14px 18px;
-            border-radius: 6px;
-            cursor: pointer;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: flex-start;
-            gap: 14px;
-            transition: background 0.15s, border-color 0.15s;
-            text-align: left;
-            line-height: 1.4;
-        }
-        
-        .quiz-option:hover {
-            border-color: var(--accent-green);
-            background-color: rgba(69, 162, 158, 0.05);
-        }
-
-        .quiz-option input { 
-            margin: 3px 0 0 0; 
-            accent-color: var(--bright-green);
-            flex-shrink: 0; 
-            width: 16px;
-            height: 16px;
-        }
-        
+        .q-editor-item { background: var(--bg-input); border: 1px solid var(--border-color); padding: 10px; border-radius: 4px; margin-bottom: 8px; font-size: 13px; }
+        .quiz-option { background-color: var(--bg-main); border: 1px solid var(--border-color); padding: 14px; border-radius: 6px; cursor: pointer; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+        .quiz-option input { margin: 0; accent-color: var(--bright-green); }
         .progress-text { font-size: 13px; color: var(--accent-green); margin-bottom: 15px; display: block; }
         .source-hint { margin-top: 20px; padding: 12px; background: #151a21; border-left: 4px solid var(--accent-green); border-radius: 4px; font-size: 13px; }
 
-        /* КОНСТРУКТОР ВОПРОСОВ (МОДАЛКА) */
-        .q-editor-item { background: var(--bg-input); border: 1px solid var(--border-color); padding: 10px; border-radius: 4px; margin-bottom: 8px; font-size: 13px; }
-
-        /* МОДАЛЬНЫЕ ОКНА (ОБЩИЕ) */
         .modal-overlay { position: fixed; top:0; left:0; width:100vw; height:100vh; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 1000; display: none; }
-        .modal-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; width: 600px; max-height: 85vh; padding: 25px; overflow-y: auto; position: relative; }
+        .modal-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; width: 95%; max-width: 600px; max-height: 80vh; padding: 25px; overflow-y: auto; position: relative; box-sizing: border-box; }
         .modal-close { position: absolute; top: 15px; right: 20px; background: none; border: none; color: #fff; font-size: 24px; cursor: pointer; }
         
         .stats-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; }
         .stats-table th, .stats-table td { border: 1px solid var(--border-color); padding: 8px; text-align: left; }
         .stats-table th { background-color: var(--bg-input); color: var(--bright-green); }
+
+        /* --- АДАПТИВНОСТЬ ДЛЯ ТЕЛЕФОНОВ (MOBILE) --- */
+        @media (max-width: 850px) {
+            body { display: flex; flex-direction: column; }
+            .mobile-header { display: flex; }
+            .mobile-tabs { display: grid; }
+            
+            /* Сидбар прячется слева */
+            .sidebar {
+                position: fixed; left: -320px; top: 0; bottom: 0;
+                transition: left 0.3s ease; box-shadow: 2px 0 10px rgba(0,0,0,0.8);
+            }
+            .sidebar.open { left: 0; }
+            
+            /* Главный контент подстраивается под экран и вкладки */
+            .main-content { display: block; padding: 15px; flex: 1; overflow-y: auto; }
+            
+            /* Логика вкладок на мобильном */
+            .left-column, .right-column { display: none; }
+            .left-column.active-tab, .right-column.active-tab { display: block; }
+
+            .book-item { flex-direction: column; align-items: flex-start; gap: 12px; }
+            .actions-box { width: 100%; justify-content: flex-start; flex-wrap: wrap; }
+            .manager-inline { flex-wrap: wrap; }
+        }
+        @media (min-width: 851px) {
+            .left-column, .right-column { display: block !important; }
+        }
     </style>
 </head>
 <body>
 
-    <div class="sidebar">
-        <h1>MEDICAL STUDY HUB</h1>
+    <div id="auth-overlay">
+        <div class="auth-card">
+            <h2 style="border:none; margin-bottom:10px;">Вход в Облако Hub</h2>
+            <p style="font-size:12px; color:var(--accent-green); margin-bottom:20px;">Введите данные аккаунта Firebase для синхронизации</p>
+            <div class="form-group">
+                <input type="email" id="auth-email" placeholder="Email (Почта)">
+                <input type="password" id="auth-password" placeholder="Пароль">
+                <button onclick="handleCloudLogin()" id="btn-login">Войти в систему</button>
+            </div>
+            <div id="auth-error" style="color:var(--danger-red); font-size:13px; font-weight:bold; margin-top:10px;"></div>
+        </div>
+    </div>
+
+    <div class="mobile-header">
+        <button class="burger-btn" onclick="toggleSidebar()">☰</button>
+        <span style="font-weight: bold; color: var(--bright-green);">MEDICAL STUDY HUB</span>
+        <div style="width: 24px;"></div> </div>
+
+    <div class="mobile-tabs">
+        <button class="tab-btn active" id="tab-lib" onclick="switchMobileTab('library')">Библиотека</button>
+        <button class="tab-btn" id="tab-test" onclick="switchMobileTab('tests')">Тесты</button>
+    </div>
+
+    <div id="sidebar-backdrop" onclick="toggleSidebar()"></div>
+
+    <div class="sidebar" id="sidebar">
+        <h1 style="margin-top: 5px;">MEDICAL STUDY HUB</h1>
         
         <div class="sidebar-scroll-area">
             <div class="category-group">
                 <div class="group-title">Навигация</div>
                 
-                <div class="subject-header active" id="node-all" onclick="window.selectFilter('all', null)">
+                <div class="subject-header active" id="node-all" onclick="selectFilter('all', null)">
                     <div class="subject-title">📁 Все материалы</div>
                     <span class="badge" id="badge-all">0</span>
                 </div>
@@ -241,8 +229,8 @@
             <div class="category-group" style="border-top: 1px solid var(--border-color); padding-top: 15px;">
                 <div class="group-title">Создать Предмет</div>
                 <div class="manager-inline">
-                    <input type="text" id="new-subj-input" placeholder="Название предмета..." style="flex:1;">
-                    <button onclick="window.createNewSubject()">+</button>
+                    <input type="text" id="new-subj-input" placeholder="Название предмета...">
+                    <button onclick="createNewSubject()">+</button>
                 </div>
 
                 <div class="group-title" style="margin-top: 15px;">Создать Папку (Модуль)</div>
@@ -250,82 +238,82 @@
                     <select id="folder-parent-subj" style="padding: 6px; font-size: 12px;"></select>
                     <div style="display: flex; gap: 6px;">
                         <input type="text" id="new-folder-input" placeholder="Название папки..." style="padding:6px; font-size:12px; flex:1;">
-                        <button onclick="window.createNewFolder()" style="padding:6px 12px; font-size:12px;">+</button>
+                        <button onclick="createNewFolder()" style="padding:6px 12px; font-size:12px;">+</button>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="sidebar-footer">
-            <button class="stats-trigger" onclick="window.openStatsModal()">
-                📊 Статистика <span id="sync-status" style="font-size: 10px; font-weight:normal; margin-left: auto; color: var(--text-muted);">Синхронизация...</span>
-            </button>
+            <button class="stats-trigger" onclick="openStatsModal()">📊 Статистика</button>
+            <button onclick="handleCloudLogout()" style="background:none; border:1px solid var(--text-muted); color:var(--text-main); padding:6px; font-size:12px;">Выйти из аккаунта</button>
         </div>
     </div>
 
     <div class="main-content">
         
-        <div class="left-column">
+        <div class="left-column active-tab" id="view-library">
             <div class="card">
                 <h2>Загрузка материалов и тестов</h2>
                 <div class="form-group">
                     <input type="text" id="book-title" placeholder="Название темы или лекции">
                     
                     <label style="font-size: 12px; color: var(--accent-green); margin-bottom: -5px;">Куда сохранить:</label>
-                    <select id="book-placement-select"></select>
+                    <select id="book-placement-select" onchange="updateFormPlacementLabels()"></select>
 
-                    <input type="text" id="book-url" placeholder="Ссылка на конспект / файл (Облако)">
+                    <input type="text" id="book-url" placeholder="Ссылка на файл (Google Диск, iCloud, YouTube и др.)">
                     
                     <label style="font-size: 12px; color: var(--accent-green); margin-bottom: -5px;">Конструктор теста (Каждый вопрос с новой строки):</label>
-                    <textarea id="book-quiz" rows="5" placeholder="Формат: Вопрос | Ответ1, Ответ2, Ответ3 | ИндексПравильного&#10;Пример: Какой гормон синтезируют С-клетки? | Тироксин, Кальцитонин | 1"></textarea>
+                    <textarea id="book-quiz" rows="4" placeholder="Формат: Вопрос | Ответ1, Ответ2, Ответ3 | ИндексПравильного&#10;Пример: Какой гормон синтезируют С-клетки? | Тироксин, Кальцитонин | 1"></textarea>
                     
-                    <button onclick="window.addMaterialToSystem()" style="padding: 14px;">Загрузить в облако</button>
+                    <button onclick="addMaterialToSystem()">Загрузить на полку</button>
                 </div>
             </div>
 
             <div class="card">
-                <h2>Электронная полка: <span id="current-view-title" style="color: var(--bright-green);">Все материалы</span></h2>
+                <h2>Электронная полка темы: <span id="current-view-title" style="color: var(--bright-green);">Все материалы</span></h2>
                 <div id="shelf-container"></div>
             </div>
         </div>
 
-        <div class="right-column">
-            <div class="card" style="position: sticky; top: 0;">
+        <div class="right-column" id="view-tests">
+            <div class="card">
                 <h2>Тестирование по выбранной папке</h2>
                 <div class="form-group" style="margin-bottom: 15px;">
                     <label style="font-size: 13px; color: var(--accent-green);">Выбрать пул вопросов:</label>
-                    <select id="topic-select" onchange="window.initSelectedTest()"></select>
+                    <select id="topic-select" onchange="initSelectedTest()"></select>
                 </div>
 
                 <div id="quiz-box">
-                    <span class="progress-text" id="quiz-progress">Загрузка данных...</span>
+                    <span class="progress-text" id="quiz-progress">Вопрос 0 из 0</span>
                     <p id="quiz-question" style="font-size: 16px; font-weight: 500; margin-bottom: 20px;"></p>
                     <div id="quiz-options"></div>
                     
                     <div style="display: flex; gap: 10px; margin-top: 15px;">
-                        <button onclick="window.checkSelectedAnswer()" style="flex: 1; padding: 14px;">Проверить ответ</button>
-                        <button onclick="window.resetCurrentQuiz()" style="background-color: var(--bg-input); color: var(--text-main); border: 1px solid var(--border-color);">Сбросить</button>
+                        <button onclick="checkSelectedAnswer()" style="flex: 1;">Проверить ответ</button>
+                        <button onclick="resetCurrentQuiz()" style="background-color: var(--bg-input); color: var(--text-main); border: 1px solid var(--border-color);">Сбросить</button>
                     </div>
                     
-                    <div id="quiz-result" style="margin-top: 15px; font-weight: bold; font-size: 15px;"></div>
+                    <div id="quiz-result" style="margin-top: 15px; font-weight: bold;"></div>
                     <div id="quiz-source-hint" class="source-hint" style="display: none;"></div>
                 </div>
             </div>
         </div>
+
     </div>
 
     <div class="modal-overlay" id="q-editor-modal">
         <div class="modal-card">
-            <button class="modal-close" onclick="window.closeQEditorModal()">&times;</button>
+            <button class="modal-close" onclick="closeQEditorModal()">&times;</button>
             <h3 style="color: var(--bright-green); margin-top:0;" id="q-editor-title">Редактирование вопросов</h3>
             
             <div style="border-bottom: 1px solid var(--border-color); padding-bottom:15px; margin-bottom:15px;">
                 <h4>Добавить новый вопрос:</h4>
                 <div class="form-group" style="margin-bottom:0;">
                     <input type="text" id="add-q-text" placeholder="Текст вопроса">
-                    <input type="text" id="add-q-answers" placeholder="Варианты ответов через запятую (Ответ1, Ответ2, Ответ3)">
-                    <input type="number" id="add-q-right" placeholder="Индекс правильного ответа (начиная с 0)">
-                    <button onclick="window.saveSingleQuestionToBook()" style="background-color: var(--warning-orange); color:#000;">Сохранить в облако</button>
+                    <input type="text" id="add-q-answers" placeholder="Варианты (Ответ1, Ответ2, Ответ3)">
+                    <input type="number" id="add-q-right" placeholder="Индекс правильного (с 0)">
+                    <button onclick="saveSingleQuestionToBook()" style="background-color: var(--warning-orange); color:#000;">Добавить вопрос</button>
                 </div>
             </div>
             <h4>Текущие вопросы:</h4>
@@ -334,48 +322,69 @@
     </div>
 
     <div class="modal-overlay" id="stats-modal">
-        <div class="modal-card" style="width: 700px;">
-            <button class="modal-close" onclick="window.closeStatsModal()">&times;</button>
-            <h3 style="color: var(--bright-green); margin-top:0;">📊 Статистика тестирования</h3>
+        <div class="modal-card">
+            <button class="modal-close" onclick="closeStatsModal()">&times;</button>
+            <h3 style="color: var(--bright-green); margin-top:0;">📊 Статистика</h3>
             
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-                <div style="background: var(--bg-main); padding: 15px; border-radius: 6px; text-align: center; border: 1px solid var(--border-color);">
-                    <span style="font-size: 12px; color: var(--text-main);">Всего ответов</span>
-                    <div style="font-size: 24px; font-weight: bold; color: #fff;" id="stat-total-clicks">0</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px;">
+                <div style="background: var(--bg-main); padding: 15px 5px; border-radius: 6px; text-align: center;">
+                    <span style="font-size: 11px; color: var(--text-main);">Ответов</span>
+                    <div style="font-size: 20px; font-weight: bold; color: #fff;" id="stat-total-clicks">0</div>
                 </div>
-                <div style="background: var(--bg-main); padding: 15px; border-radius: 6px; text-align: center; border: 1px solid var(--border-color);">
-                    <span style="font-size: 12px; color: var(--bright-green);">Правильно</span>
-                    <div style="font-size: 24px; font-weight: bold; color: var(--bright-green);" id="stat-total-right">0</div>
+                <div style="background: var(--bg-main); padding: 15px 5px; border-radius: 6px; text-align: center;">
+                    <span style="font-size: 11px; color: var(--bright-green);">Верно</span>
+                    <div style="font-size: 20px; font-weight: bold; color: var(--bright-green);" id="stat-total-right">0</div>
                 </div>
-                <div style="background: var(--bg-main); padding: 15px; border-radius: 6px; text-align: center; border: 1px solid var(--border-color);">
-                    <span style="font-size: 12px; color: var(--danger-red);">Ошибки</span>
-                    <div style="font-size: 24px; font-weight: bold; color: var(--danger-red);" id="stat-total-wrong">0</div>
+                <div style="background: var(--bg-main); padding: 15px 5px; border-radius: 6px; text-align: center;">
+                    <span style="font-size: 11px; color: var(--danger-red);">Ошибок</span>
+                    <div style="font-size: 20px; font-weight: bold; color: var(--danger-red);" id="stat-total-wrong">0</div>
                 </div>
             </div>
 
-            <div style="overflow-x: auto; max-height: 300px;">
+            <div style="overflow-x: auto;">
                 <table class="stats-table">
-                    <thead>
-                        <tr>
-                            <th>Предмет / Тема материала</th>
-                            <th>Правильно</th>
-                            <th>Неправильно</th>
-                            <th>Успешность</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><th>Предмет</th><th>Прав.</th><th>Ошиб.</th><th>%</th></tr></thead>
                     <tbody id="stats-table-body"></tbody>
                 </table>
             </div>
-            <button onclick="window.clearStatsLogs()" style="margin-top:20px; background: none; border: 1px solid var(--danger-red); color: var(--danger-red); padding: 10px 15px; font-size:13px; width:100%; border-radius: 4px; cursor: pointer;">Сбросить всю историю статистики</button>
+            <button onclick="clearStatsLogs()" style="margin-top:15px; background: none; border: 1px solid var(--danger-red); color: var(--danger-red); padding: 8px 15px; font-size:12px; width:100%;">Сбросить историю</button>
         </div>
     </div>
 
-    <script type="module">
-        // Импорт модулей Firebase v10
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const backdrop = document.getElementById('sidebar-backdrop');
+            if (sidebar.classList.contains('open')) {
+                sidebar.classList.remove('open');
+                backdrop.style.display = 'none';
+            } else {
+                sidebar.classList.add('open');
+                backdrop.style.display = 'block';
+            }
+        }
 
-        // Ваша конфигурация Firebase
+        function switchMobileTab(tab) {
+            document.getElementById('tab-lib').classList.remove('active');
+            document.getElementById('tab-test').classList.remove('active');
+            document.getElementById('view-library').classList.remove('active-tab');
+            document.getElementById('view-tests').classList.remove('active-tab');
+
+            if(tab === 'library') {
+                document.getElementById('tab-lib').classList.add('active');
+                document.getElementById('view-library').classList.add('active-tab');
+            } else {
+                document.getElementById('tab-test').classList.add('active');
+                document.getElementById('view-tests').classList.add('active-tab');
+            }
+        }
+    </script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
         const firebaseConfig = {
             apiKey: "AIzaSyDMe999LGnsRGIfc06a0XxyPcSKZQVMMTw",
             authDomain: "medicalapp-3b9ce.firebaseapp.com",
@@ -385,261 +394,239 @@
             appId: "1:1033037915480:web:2400098e41f622ffca312d"
         };
 
-        // Инициализация сервисов
         const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
         const db = getFirestore(app);
-        
-        // Ссылка на единый документ, где хранится вся база (коллекция HubData, документ MyCloudState)
-        const docRef = doc(db, "HubData", "MyCloudState");
+        let currentUser = null;
 
-        // Стартовые заглушки (пока данные не загрузятся из облака)
-        let dbStructure = { subjects: { "Загрузка...": [] } };
-        let dbMaterials = [];
-        let dbStats = { totalRight: 0, totalWrong: 0, topics: {} };
+        const defaultStructure = { subjects: { "Архив": [] } };
+        const defaultMaterials = [];
 
-        // Состояние интерфейса
-        let currentFilterType = 'all'; 
-        let currentFilterTarget = null;
-        let currentEditingBookId = null;
+        window.dbStructure = defaultStructure;
+        window.dbMaterials = defaultMaterials;
+        window.dbStats = { totalRight: 0, totalWrong: 0, topics: {} };
 
-        // Состояние теста
-        let testPool = [];
-        let testIdx = 0;
-        let testCorrectCount = 0;
+        window.currentFilterType = 'all'; 
+        window.currentFilterTarget = null; 
+        window.currentEditingBookId = null; 
+        window.testPool = []; window.testIdx = 0; window.testCorrectCount = 0;
 
-        // ==========================================
-        // 1. СИНХРОНИЗАЦИЯ В РЕАЛЬНОМ ВРЕМЕНИ
-        // ==========================================
-        onSnapshot(docRef, (docSnap) => {
-            if (docSnap.exists()) {
-                const cloudData = docSnap.data();
-                dbStructure = cloudData.structure || { subjects: {} };
-                dbMaterials = cloudData.materials || [];
-                dbStats = cloudData.stats || { totalRight: 0, totalWrong: 0, topics: {} };
-                
-                document.getElementById('sync-status').innerText = "☁️ Облако активно";
-                document.getElementById('sync-status').style.color = "var(--bright-green)";
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('auth-overlay').style.display = 'none';
+                await loadDataFromCloud();
             } else {
-                // Если база пустая (первый запуск), создаем стандартную структуру
-                dbStructure = { subjects: { "Анатомия": [], "Физиология": [] } };
-                saveToCloud();
+                currentUser = null;
+                document.getElementById('auth-overlay').style.display = 'flex';
             }
-            
-            // Обновляем весь UI после получения данных
-            renderNavigation();
-            renderLibraryShelf();
-            updateTopicSelectorDropdown();
-            
-            // Если активно модальное окно редактирования, обновляем и его
-            if (currentEditingBookId) renderQEditorList();
-        }, (error) => {
-            console.error("Ошибка доступа к Firebase:", error);
-            document.getElementById('sync-status').innerText = "❌ Ошибка БД (проверьте Rules)";
-            document.getElementById('sync-status').style.color = "var(--danger-red)";
         });
 
-        // Функция отправки данных в облако (заменяет localStorage)
-        async function saveToCloud() {
-            try {
-                await setDoc(docRef, {
-                    structure: dbStructure,
-                    materials: dbMaterials,
-                    stats: dbStats
-                });
-            } catch (e) {
-                console.error("Ошибка сохранения:", e);
-                alert("Ошибка синхронизации. Проверьте правила (Rules) в Firebase Console.");
-            }
+        window.handleCloudLogin = function() {
+            const email = document.getElementById('auth-email').value.trim();
+            const pass = document.getElementById('auth-password').value;
+            const errDiv = document.getElementById('auth-error');
+            const btn = document.getElementById('btn-login');
+
+            if(!email || !pass) return alert('Заполните поля!');
+            btn.innerText = "Загрузка...";
+
+            signInWithEmailAndPassword(auth, email, pass).catch(error => {
+                btn.innerText = "Войти в систему";
+                errDiv.innerText = "Ошибка входа. Проверьте данные.";
+            });
         }
 
-        // ==========================================
-        // 2. ГЛОБАЛЬНЫЕ ФУНКЦИИ (ПРИВЯЗКА К WINDOW)
-        // ==========================================
+        window.handleCloudLogout = function() { signOut(auth); }
 
-        window.renderNavigation = function() {
+        async function loadDataFromCloud() {
+            if (!currentUser) return;
+            try {
+                const docRef = doc(db, "users_data", currentUser.uid);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const cd = docSnap.data();
+                    window.dbStructure = cd.dbStructure || defaultStructure;
+                    window.dbMaterials = cd.dbMaterials || defaultMaterials;
+                    window.dbStats = cd.dbStats || { totalRight: 0, totalWrong: 0, topics: {} };
+                } else {
+                    await saveDataToCloud();
+                }
+                renderNavigation(); renderLibraryShelf(); updateTopicSelectorDropdown();
+            } catch (e) { console.error(e); }
+        }
+
+        window.saveToStorage = async function() { await saveDataToCloud(); }
+
+        async function saveDataToCloud() {
+            if (!currentUser) return;
+            try {
+                await setDoc(doc(db, "users_data", currentUser.uid), {
+                    dbStructure: window.dbStructure,
+                    dbMaterials: window.dbMaterials,
+                    dbStats: window.dbStats
+                });
+            } catch (e) { console.error(e); }
+        }
+    </script>
+
+    <script>
+        function renderNavigation() {
             const container = document.getElementById('hierarchy-box');
-            container.innerHTML = '';
-            for (let subj in dbStructure.subjects) {
-                const folders = dbStructure.subjects[subj];
-                const totalSubjCount = dbMaterials.filter(m => m.subject === subj).length;
-                const isSubjActive = (currentFilterType === 'subject' && currentFilterTarget === subj);
+            if(!container) return; container.innerHTML = '';
 
-                let subjHTML = `
-                    <div class="subject-container">
-                        <div class="subject-header ${isSubjActive ? 'active' : ''}" onclick="window.selectFilter('subject', '${subj}')">
-                            <div class="subject-title">📁 ${subj}</div>
-                            <div style="display:flex; align-items:center; gap:6px;">
-                                <span class="badge">${totalSubjCount}</span>
-                                <button class="btn-del-node" onclick="window.deleteSubjectNode('${subj}', event)" title="Удалить предмет">&times;</button>
-                            </div>
+            for (let subj in window.dbStructure.subjects) {
+                const folders = window.dbStructure.subjects[subj];
+                const totalSubjCount = window.dbMaterials.filter(m => m.subject === subj).length;
+                const isSubjActive = (window.currentFilterType === 'subject' && window.currentFilterTarget === subj);
+
+                let subjHTML = `<div class="subject-container">
+                    <div class="subject-header ${isSubjActive ? 'active' : ''}" onclick="selectFilter('subject', '${subj}')">
+                        <div class="subject-title">📁 ${subj}</div>
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <span class="badge">${totalSubjCount}</span>
+                            <button class="btn-del-node" onclick="deleteSubjectNode('${subj}', event)">&times;</button>
                         </div>
-                        <div class="folder-list expanded">
-                `;
+                    </div>
+                    <div class="folder-list expanded">`;
 
                 folders.forEach(folder => {
-                    const folderCount = dbMaterials.filter(m => m.subject === subj && m.folder === folder).length;
-                    const isFolderActive = (currentFilterType === 'folder' && currentFilterTarget === folder);
-
-                    subjHTML += `
-                        <div class="folder-header ${isFolderActive ? 'active' : ''}" onclick="window.selectFilter('folder', '${folder}', '${subj}')">
-                            <div class="folder-title">↳ 📂 ${folder}</div>
-                            <div style="display:flex; align-items:center; gap:6px;">
-                                <span class="badge">${folderCount}</span>
-                                <button class="btn-del-node" onclick="window.deleteFolderNode('${subj}', '${folder}', event)" title="Удалить папку">&times;</button>
-                            </div>
+                    const folderCount = window.dbMaterials.filter(m => m.subject === subj && m.folder === folder).length;
+                    const isFolderActive = (window.currentFilterType === 'folder' && window.currentFilterTarget === folder);
+                    subjHTML += `<div class="folder-header ${isFolderActive ? 'active' : ''}" onclick="selectFilter('folder', '${folder}', '${subj}')">
+                        <div class="folder-title">↳ 📂 ${folder}</div>
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <span class="badge">${folderCount}</span>
+                            <button class="btn-del-node" onclick="deleteFolderNode('${subj}', '${folder}', event)">&times;</button>
                         </div>
-                    `;
+                    </div>`;
                 });
                 subjHTML += `</div></div>`;
                 container.innerHTML += subjHTML;
             }
-            document.getElementById('badge-all').innerText = dbMaterials.length;
-            window.updateFormSelects();
-        };
+            document.getElementById('badge-all').innerText = window.dbMaterials.length;
+            updateFormSelects();
+        }
 
-        window.updateFormSelects = function() {
+        function updateFormSelects() {
             const parentSubjSelect = document.getElementById('folder-parent-subj');
             const placementSelect = document.getElementById('book-placement-select');
+            if(!parentSubjSelect || !placementSelect) return;
             
             parentSubjSelect.innerHTML = '';
-            for (let subj in dbStructure.subjects) {
+            for (let subj in window.dbStructure.subjects) {
                 parentSubjSelect.innerHTML += `<option value="${subj}">${subj}</option>`;
             }
 
             placementSelect.innerHTML = '';
-            for (let subj in dbStructure.subjects) {
+            for (let subj in window.dbStructure.subjects) {
                 placementSelect.innerHTML += `<option value="SUBJ:${subj}">На общую полку: ${subj}</option>`;
-                dbStructure.subjects[subj].forEach(folder => {
-                    placementSelect.innerHTML += `<option value="FOLD:${subj}|${folder}">В папку: ${subj} ➔ ${folder}</option>`;
+                window.dbStructure.subjects[subj].forEach(folder => {
+                    placementSelect.innerHTML += `<option value="FOLD:${subj}|${folder}">Папка: ${subj} ➔ ${folder}</option>`;
                 });
             }
-        };
+        }
 
-        window.createNewSubject = function() {
+        function createNewSubject() {
             const input = document.getElementById('new-subj-input');
             const val = input.value.trim();
             if (!val) return;
-            if (dbStructure.subjects[val]) return alert('Такой предмет уже создан!');
+            if (window.dbStructure.subjects[val]) return alert('Уже создано!');
+            window.dbStructure.subjects[val] = []; window.saveToStorage();
+            input.value = ''; renderNavigation();
+        }
 
-            dbStructure.subjects[val] = [];
-            saveToCloud();
-            input.value = '';
-        };
-
-        window.createNewFolder = function() {
+        function createNewFolder() {
             const parent = document.getElementById('folder-parent-subj').value;
             const input = document.getElementById('new-folder-input');
             const val = input.value.trim();
             if (!parent || !val) return;
-            if (dbStructure.subjects[parent].includes(val)) return alert('В этом предмете уже есть такая папка!');
+            if (window.dbStructure.subjects[parent].includes(val)) return alert('Уже создано!');
+            window.dbStructure.subjects[parent].push(val); window.saveToStorage();
+            input.value = ''; renderNavigation();
+        }
 
-            dbStructure.subjects[parent].push(val);
-            saveToCloud();
-            input.value = '';
-        };
-
-        window.deleteSubjectNode = function(subj, event) {
+        function deleteSubjectNode(subj, event) {
             event.stopPropagation();
-            if (!confirm(`Удалить предмет "${subj}"? Конспекты будут перенесены в Архив.`)) return;
-            
-            dbMaterials.forEach(m => { if(m.subject === subj) { m.subject = "Архив"; m.folder = ""; } });
-            delete dbStructure.subjects[subj];
-            if (currentFilterTarget === subj) window.selectFilter('all', null);
-            saveToCloud();
-        };
+            if (!confirm(`Удалить предмет?`)) return;
+            window.dbMaterials.forEach(m => { if(m.subject === subj) { m.subject = "Архив"; m.folder = ""; } });
+            delete window.dbStructure.subjects[subj];
+            if (window.currentFilterTarget === subj) selectFilter('all', null);
+            window.saveToStorage(); renderNavigation(); renderLibraryShelf();
+        }
 
-        window.deleteFolderNode = function(subj, folder, event) {
+        function deleteFolderNode(subj, folder, event) {
             event.stopPropagation();
-            if (!confirm(`Удалить папку "${folder}"? Конспекты останутся на общей полке.`)) return;
+            if (!confirm(`Удалить папку?`)) return;
+            window.dbMaterials.forEach(m => { if (m.subject === subj && m.folder === folder) m.folder = ""; });
+            window.dbStructure.subjects[subj] = window.dbStructure.subjects[subj].filter(f => f !== folder);
+            if (window.currentFilterTarget === folder) selectFilter('all', null);
+            window.saveToStorage(); renderNavigation(); renderLibraryShelf();
+        }
 
-            dbMaterials.forEach(m => { if (m.subject === subj && m.folder === folder) m.folder = ""; });
-            dbStructure.subjects[subj] = dbStructure.subjects[subj].filter(f => f !== folder);
-            if (currentFilterTarget === folder) window.selectFilter('all', null);
-            saveToCloud();
-        };
-
-        window.selectFilter = function(type, target, parentSubj = null) {
-            currentFilterType = type;
-            currentFilterTarget = target;
-
+        function selectFilter(type, target, parentSubj = null) {
+            window.currentFilterType = type; window.currentFilterTarget = target;
             document.querySelectorAll('.subject-header, .folder-header').forEach(el => el.classList.remove('active'));
             const titleEl = document.getElementById('current-view-title');
+            if (type === 'all') { document.getElementById('node-all').classList.add('active'); titleEl.innerText = "Все материалы"; } 
+            else if (type === 'subject') { titleEl.innerText = `Предмет: ${target}`; renderNavigation(); } 
+            else if (type === 'folder') { titleEl.innerText = `Модуль: ${target}`; renderNavigation(); }
             
-            if (type === 'all') {
-                document.getElementById('node-all').classList.add('active');
-                titleEl.innerText = "Все материалы";
-            } else if (type === 'subject') {
-                titleEl.innerText = `Предмет: ${target}`;
-            } else if (type === 'folder') {
-                titleEl.innerText = `Модуль: ${target} (${parentSubj})`;
-            }
-            
-            window.renderNavigation();
-            window.renderLibraryShelf();
-            window.updateTopicSelectorDropdown();
-        };
+            if(window.innerWidth <= 850) toggleSidebar();
+            renderLibraryShelf(); updateTopicSelectorDropdown();
+        }
 
-        window.addMaterialToSystem = function() {
+        function addMaterialToSystem() {
             const name = document.getElementById('book-title').value.trim();
             const placement = document.getElementById('book-placement-select').value;
             const url = document.getElementById('book-url').value.trim() || '#';
             const quizRaw = document.getElementById('book-quiz').value;
 
-            if (!name || !placement) return alert('Введите название и выберите место сохранения!');
+            if (!name) return alert('Введите название!');
+            if (!placement) return alert('Создайте предмет в меню слева!');
 
             let targetSubject = "", targetFolder = "";
-            if (placement.startsWith('SUBJ:')) {
-                targetSubject = placement.replace('SUBJ:', '');
-            } else if (placement.startsWith('FOLD:')) {
+            if (placement.startsWith('SUBJ:')) targetSubject = placement.replace('SUBJ:', '');
+            else if (placement.startsWith('FOLD:')) {
                 const chunk = placement.replace('FOLD:', '').split('|');
                 targetSubject = chunk[0]; targetFolder = chunk[1];
             }
 
             let questions = [];
             if (quizRaw.trim() !== "") {
-                const lines = quizRaw.split('\n');
-                lines.forEach(line => {
+                quizRaw.split('\n').forEach(line => {
                     if (line.trim() === "") return;
                     try {
                         const parts = line.split('|');
-                        const qText = parts[0].trim();
-                        const answers = parts[1].split(',').map(a => a.trim());
-                        const rightIdx = parseInt(parts[2].trim());
-                        if(qText && answers.length > 0 && !isNaN(rightIdx)) {
-                            questions.push({ q: qText, a: answers, right: rightIdx });
-                        }
+                        questions.push({ q: parts[0].trim(), a: parts[1].split(',').map(a => a.trim()), right: parseInt(parts[2].trim()) });
                     } catch (e) {}
                 });
             }
 
-            dbMaterials.push({ id: Date.now(), name, subject: targetSubject, folder: targetFolder, url, questions });
-            saveToCloud();
+            window.dbMaterials.push({ id: Date.now(), name, subject: targetSubject, folder: targetFolder, url, questions });
+            window.saveToStorage();
+            document.getElementById('book-title').value = ''; document.getElementById('book-url').value = ''; document.getElementById('book-quiz').value = '';
+            renderLibraryShelf(); renderNavigation(); updateTopicSelectorDropdown();
+        }
 
-            document.getElementById('book-title').value = '';
-            document.getElementById('book-url').value = '';
-            document.getElementById('book-quiz').value = '';
-        };
+        function deleteMaterial(id) {
+            if(!confirm('Удалить конспект?')) return;
+            window.dbMaterials = window.dbMaterials.filter(m => m.id !== id);
+            window.saveToStorage(); renderLibraryShelf(); renderNavigation(); updateTopicSelectorDropdown();
+        }
 
-        window.deleteMaterial = function(id) {
-            if(!confirm("Удалить материал и все тесты из облака?")) return;
-            dbMaterials = dbMaterials.filter(m => m.id !== id);
-            saveToCloud();
-        };
-
-        window.renderLibraryShelf = function() {
+        function renderLibraryShelf() {
             const container = document.getElementById('shelf-container');
-            container.innerHTML = '';
-            const filtered = dbMaterials.filter(m => {
-                if (currentFilterType === 'all') return true;
-                if (currentFilterType === 'subject') return m.subject === currentFilterTarget;
-                if (currentFilterType === 'folder') return m.folder === currentFilterTarget;
+            if(!container) return; container.innerHTML = '';
+            const filtered = window.dbMaterials.filter(m => {
+                if (window.currentFilterType === 'all') return true;
+                if (window.currentFilterType === 'subject') return m.subject === window.currentFilterTarget;
+                if (window.currentFilterType === 'folder') return m.folder === window.currentFilterTarget;
                 return true;
             });
 
-            if (filtered.length === 0) {
-                container.innerHTML = `<div style="color: var(--text-muted); text-align:center; padding: 20px;">Полка пуста</div>`;
-                return;
-            }
+            if (filtered.length === 0) { container.innerHTML = `<div style="color: var(--text-muted); text-align:center; padding: 20px;">На этой полке пусто</div>`; return; }
 
             filtered.forEach(m => {
                 const tags = `${m.subject} ${m.folder ? ' ➔ ' + m.folder : ''}`;
@@ -647,226 +634,174 @@
                     <div class="book-item">
                         <div class="book-info">
                             <span style="font-weight:500;">${m.name}</span>
-                            <span class="subject-tag">📍 ${tags} ${m.questions.length ? ' • 📝 Вопросов: ' + m.questions.length : ' (Без теста)'}</span>
+                            <span class="subject-tag">📍 ${tags} ${m.questions.length ? ' • Вопросов: ' + m.questions.length : ''}</span>
                         </div>
                         <div class="actions-box">
                             <a href="${m.url}" class="btn-open" target="_blank">Открыть</a>
-                            <button class="btn-edit-q" onclick="window.openQEditorModal(${m.id})">Тест (±)</button>
-                            <button class="btn-delete" onclick="window.deleteMaterial(${m.id})">Удалить</button>
+                            <button class="btn-edit-q" onclick="openQEditorModal(${m.id})">Тесты ±</button>
+                            <button class="btn-delete" onclick="deleteMaterial(${m.id})">Удалить</button>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             });
-        };
+        }
 
-        window.updateTopicSelectorDropdown = function() {
+        function updateTopicSelectorDropdown() {
             const select = document.getElementById('topic-select');
-            select.innerHTML = '<option value="current_scope">Все тесты текущей области навигации</option>';
-            dbMaterials.forEach(m => {
+            if(!select) return; select.innerHTML = '<option value="current_scope">Текущая область навигации</option>';
+            window.dbMaterials.forEach(m => {
                 if (m.questions && m.questions.length > 0) {
-                    if (currentFilterType === 'all' || 
-                        (currentFilterType === 'subject' && m.subject === currentFilterTarget) ||
-                        (currentFilterType === 'folder' && m.folder === currentFilterTarget)) {
-                        select.innerHTML += `<option value="${m.id}">Тест: ${m.name}</option>`;
+                    if (window.currentFilterType === 'all' || 
+                        (window.currentFilterType === 'subject' && m.subject === window.currentFilterTarget) ||
+                        (window.currentFilterType === 'folder' && m.folder === window.currentFilterTarget)) {
+                        select.innerHTML += `<option value="${m.id}">${m.name}</option>`;
                     }
                 }
             });
-            window.initSelectedTest();
-        };
+            initSelectedTest();
+        }
 
-        window.initSelectedTest = function() {
-            const selectVal = document.getElementById('topic-select').value;
-            testPool = []; testIdx = 0; testCorrectCount = 0;
+        function initSelectedTest() {
+            const select = document.getElementById('topic-select');
+            if(!select) return; 
+            window.testPool = []; window.testIdx = 0; window.testCorrectCount = 0;
 
-            if (selectVal === 'current_scope') {
-                dbMaterials.forEach(m => {
-                    if ((currentFilterType === 'all') || 
-                        (currentFilterType === 'subject' && m.subject === currentFilterTarget) ||
-                        (currentFilterType === 'folder' && m.folder === currentFilterTarget)) {
-                        if(m.questions) m.questions.forEach(q => { testPool.push({ ...q, originBookId: m.id, originBookName: m.name }); });
+            if (select.value === 'current_scope') {
+                window.dbMaterials.forEach(m => {
+                    if ((window.currentFilterType === 'all') || 
+                        (window.currentFilterType === 'subject' && m.subject === window.currentFilterTarget) ||
+                        (window.currentFilterType === 'folder' && m.folder === window.currentFilterTarget)) {
+                        if(m.questions) m.questions.forEach(q => window.testPool.push({ ...q, originBookId: m.id, originBookName: m.name }));
                     }
                 });
             } else {
-                const targetBook = dbMaterials.find(m => m.id == selectVal);
-                if (targetBook && targetBook.questions) {
-                    targetBook.questions.forEach(q => { testPool.push({ ...q, originBookId: targetBook.id, originBookName: targetBook.name }); });
-                }
+                const targetBook = window.dbMaterials.find(m => m.id == select.value);
+                if (targetBook && targetBook.questions) targetBook.questions.forEach(q => window.testPool.push({ ...q, originBookId: targetBook.id, originBookName: targetBook.name }));
             }
+            loadTestQuestionCard();
+        }
 
-            // Перемешивание (Fisher-Yates)
-            for (let i = testPool.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [testPool[i], testPool[j]] = [testPool[j], testPool[i]];
-            }
-            window.loadTestQuestionCard();
-        };
-
-        window.loadTestQuestionCard = function() {
-            const resDiv = document.getElementById('quiz-result');
-            const hintDiv = document.getElementById('quiz-source-hint');
+        function loadTestQuestionCard() {
+            const resDiv = document.getElementById('quiz-result'); const hintDiv = document.getElementById('quiz-source-hint');
             resDiv.innerHTML = ''; hintDiv.style.display = 'none';
 
-            if (testPool.length === 0) {
+            if (window.testPool.length === 0) {
                 document.getElementById('quiz-progress').innerText = "Вопросов нет";
-                document.getElementById('quiz-question').innerText = "Выберите материал с добавленными тестами.";
-                document.getElementById('quiz-options').innerHTML = '';
-                return;
+                document.getElementById('quiz-question').innerText = "Здесь отсутствуют тесты.";
+                document.getElementById('quiz-options').innerHTML = ''; return;
             }
 
-            if (testIdx >= testPool.length) {
+            if (window.testIdx >= window.testPool.length) {
                 document.getElementById('quiz-progress').innerText = "Завершено";
-                document.getElementById('quiz-question').innerText = `Результат: ${testCorrectCount} из ${testPool.length} правильных ответов.`;
+                document.getElementById('quiz-question').innerText = `Результат: ${window.testCorrectCount} из ${window.testPool.length} верно.`;
                 document.getElementById('quiz-options').innerHTML = '';
                 hintDiv.style.display = 'block';
-                hintDiv.innerHTML = `<b style="color: var(--bright-green);">Рекомендация:</b> Повторите материал: <i>${testPool[0].originBookName}</i>`;
+                hintDiv.innerHTML = `<b style="color: var(--bright-green);">Совет:</b> Повторите материал: <i>${window.testPool[0].originBookName}</i>`;
                 return;
             }
 
-            const activeQ = testPool[testIdx];
-            document.getElementById('quiz-progress').innerText = `Вопрос ${testIdx + 1} из ${testPool.length}`;
+            const activeQ = window.testPool[window.testIdx];
+            document.getElementById('quiz-progress').innerText = `Вопрос ${window.testIdx + 1} из ${window.testPool.length}`;
             document.getElementById('quiz-question').innerText = activeQ.q;
-
-            const container = document.getElementById('quiz-options');
-            container.innerHTML = '';
+            const container = document.getElementById('quiz-options'); container.innerHTML = '';
             activeQ.a.forEach((opt, idx) => {
-                container.innerHTML += `
-                    <label class="quiz-option">
-                        <input type="radio" name="hub-quiz-radio" value="${idx}">
-                        ${opt}
-                    </label>
-                `;
+                container.innerHTML += `<label class="quiz-option"><input type="radio" name="hub-quiz-radio" value="${idx}"> ${opt}</label>`;
             });
-        };
+        }
 
-        window.checkSelectedAnswer = function() {
-            if (testIdx >= testPool.length) return;
+        function checkSelectedAnswer() {
+            if (window.testIdx >= window.testPool.length) return;
             const checked = document.querySelector('input[name="hub-quiz-radio"]:checked');
-            if (!checked) return alert('Выберите вариант ответа!');
+            if (!checked) return alert('Выберите вариант!');
 
-            const activeQ = testPool[testIdx];
+            const activeQ = window.testPool[window.testIdx];
             const answerIdx = parseInt(checked.value);
             const resDiv = document.getElementById('quiz-result');
 
-            if (!dbStats.topics[activeQ.originBookName]) dbStats.topics[activeQ.originBookName] = { right: 0, wrong: 0 };
+            if (!window.dbStats.topics[activeQ.originBookName]) window.dbStats.topics[activeQ.originBookName] = { right: 0, wrong: 0 };
 
             if (answerIdx === activeQ.right) {
-                testCorrectCount++;
-                dbStats.totalRight++;
-                dbStats.topics[activeQ.originBookName].right++;
+                window.testCorrectCount++; window.dbStats.totalRight++; window.dbStats.topics[activeQ.originBookName].right++;
                 resDiv.innerHTML = `<span style="color: var(--bright-green);">✓ Правильно!</span>`;
             } else {
-                dbStats.totalWrong++;
-                dbStats.topics[activeQ.originBookName].wrong++;
-                resDiv.innerHTML = `<span style="color: var(--danger-red);">✕ Ошибка. Правильный ответ: ${activeQ.a[activeQ.right]}</span>`;
+                window.dbStats.totalWrong++; window.dbStats.topics[activeQ.originBookName].wrong++;
+                resDiv.innerHTML = `<span style="color: var(--danger-red);">✕ Ошибка. Ответ: ${activeQ.a[activeQ.right]}</span>`;
             }
 
-            saveToCloud(); // Синхронизируем стату с облаком
+            window.saveToStorage();
+            setTimeout(() => { window.testIdx++; loadTestQuestionCard(); }, 1800);
+        }
 
-            setTimeout(() => { testIdx++; window.loadTestQuestionCard(); }, 1800);
-        };
+        function resetCurrentQuiz() { window.testIdx = 0; window.testCorrectCount = 0; loadTestQuestionCard(); }
 
-        window.resetCurrentQuiz = function() { window.initSelectedTest(); };
-
-        window.openQEditorModal = function(bookId) {
-            currentEditingBookId = bookId;
-            const book = dbMaterials.find(m => m.id === bookId);
+        function openQEditorModal(bookId) {
+            window.currentEditingBookId = bookId;
+            const book = window.dbMaterials.find(m => m.id === bookId);
             if (!book) return;
-            document.getElementById('q-editor-title').innerText = `Редактор вопросов: "${book.name}"`;
+            document.getElementById('q-editor-title').innerText = `Тесты: "${book.name}"`;
             document.getElementById('q-editor-modal').style.display = 'flex';
-            window.renderQEditorList();
-        };
+            renderQEditorList();
+        }
+        function closeQEditorModal() { document.getElementById('q-editor-modal').style.display = 'none'; window.currentEditingBookId = null; renderLibraryShelf(); initSelectedTest(); }
 
-        window.closeQEditorModal = function() {
-            document.getElementById('q-editor-modal').style.display = 'none';
-            currentEditingBookId = null;
-        };
-
-        window.renderQEditorList = function() {
-            const container = document.getElementById('q-editor-list-container');
-            container.innerHTML = '';
-            const book = dbMaterials.find(m => m.id === currentEditingBookId);
-            if (!book || !book.questions.length) {
-                container.innerHTML = '<div style="color:var(--text-muted);">Тестов нет. Добавьте первый вопрос выше.</div>';
-                return;
-            }
-
+        function renderQEditorList() {
+            const container = document.getElementById('q-editor-list-container'); container.innerHTML = '';
+            const book = window.dbMaterials.find(m => m.id === window.currentEditingBookId);
+            if (!book || !book.questions.length) { container.innerHTML = '<div style="color:var(--text-muted);">Тестов нет.</div>'; return; }
             book.questions.forEach((q, idx) => {
                 container.innerHTML += `
                     <div class="q-editor-item">
                         <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:5px;">
-                            <b>Вопрос ${idx + 1}: ${q.q}</b>
-                            <button class="btn-delete" style="padding:2px 8px; font-size:11px;" onclick="window.deleteSingleQuestionFromBook(${idx})">Удалить</button>
+                            <b>В. ${idx + 1}: ${q.q}</b>
+                            <button class="btn-delete" style="padding:2px 8px; font-size:11px;" onclick="deleteSingleQuestionFromBook(${idx})">Удалить</button>
                         </div>
                         <div style="color: var(--accent-green); font-size:12px;">Варианты: ${q.a.join(', ')}</div>
-                        <div style="color: var(--bright-green); font-size:12px;">Правильный: [${q.right}] ${q.a[q.right]}</div>
-                    </div>
-                `;
+                        <div style="color: var(--bright-green); font-size:12px;">Верный индекс: ${q.right}</div>
+                    </div>`;
             });
-        };
+        }
 
-        window.saveSingleQuestionToBook = function() {
+        function saveSingleQuestionToBook() {
             const qText = document.getElementById('add-q-text').value.trim();
             const qAnsRaw = document.getElementById('add-q-answers').value.trim();
             const qRightIdx = parseInt(document.getElementById('add-q-right').value);
 
-            if (!qText || !qAnsRaw || isNaN(qRightIdx)) return alert('Заполните все поля!');
-            const book = dbMaterials.find(m => m.id === currentEditingBookId);
+            if (!qText || !qAnsRaw || isNaN(qRightIdx)) return alert('Заполните поля корректно!');
+            const book = window.dbMaterials.find(m => m.id === window.currentEditingBookId);
             if (!book) return;
-
             const answers = qAnsRaw.split(',').map(a => a.trim());
             if (qRightIdx >= answers.length || qRightIdx < 0) return alert('Индекс выходит за рамки!');
 
             book.questions.push({ q: qText, a: answers, right: qRightIdx });
-            saveToCloud();
+            window.saveToStorage();
+            document.getElementById('add-q-text').value = ''; document.getElementById('add-q-answers').value = ''; document.getElementById('add-q-right').value = '';
+            renderQEditorList();
+        }
 
-            document.getElementById('add-q-text').value = '';
-            document.getElementById('add-q-answers').value = '';
-            document.getElementById('add-q-right').value = '';
-        };
+        function deleteSingleQuestionFromBook(idx) {
+            const book = window.dbMaterials.find(m => m.id === window.currentEditingBookId);
+            book.questions.splice(idx, 1); window.saveToStorage(); renderQEditorList();
+        }
 
-        window.deleteSingleQuestionFromBook = function(idx) {
-            const book = dbMaterials.find(m => m.id === currentEditingBookId);
-            if (!book) return;
-            book.questions.splice(idx, 1);
-            saveToCloud();
-        };
-
-        window.openStatsModal = function() {
+        function openStatsModal() {
             document.getElementById('stats-modal').style.display = 'flex';
-            document.getElementById('stat-total-clicks').innerText = dbStats.totalRight + dbStats.totalWrong;
-            document.getElementById('stat-total-right').innerText = dbStats.totalRight;
-            document.getElementById('stat-total-wrong').innerText = dbStats.totalWrong;
+            document.getElementById('stat-total-clicks').innerText = window.dbStats.totalRight + window.dbStats.totalWrong;
+            document.getElementById('stat-total-right').innerText = window.dbStats.totalRight;
+            document.getElementById('stat-total-wrong').innerText = window.dbStats.totalWrong;
+            const tbody = document.getElementById('stats-table-body'); tbody.innerHTML = '';
 
-            const tbody = document.getElementById('stats-table-body');
-            tbody.innerHTML = '';
-            if (Object.keys(dbStats.topics).length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">Статистика пуста.</td></tr>';
-                return;
-            }
-
-            for (let topicName in dbStats.topics) {
-                const item = dbStats.topics[topicName];
+            if (Object.keys(window.dbStats.topics).length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Статистика пуста.</td></tr>'; return; }
+            for (let topicName in window.dbStats.topics) {
+                const item = window.dbStats.topics[topicName];
                 const total = item.right + item.wrong;
                 const rate = total > 0 ? Math.round((item.right / total) * 100) : 0;
-                tbody.innerHTML += `
-                    <tr>
-                        <td>📖 ${topicName}</td>
-                        <td style="color:var(--bright-green); font-weight:bold;">${item.right}</td>
-                        <td style="color:var(--danger-red); font-weight:bold;">${item.wrong}</td>
-                        <td style="font-weight:bold; color: ${rate >= 70 ? 'var(--bright-green)' : 'var(--warning-orange)'}">${rate}%</td>
-                    </tr>
-                `;
+                tbody.innerHTML += `<tr><td>${topicName}</td><td style="color:var(--bright-green);">${item.right}</td><td style="color:var(--danger-red);">${item.wrong}</td><td>${rate}%</td></tr>`;
             }
-        };
-
-        window.closeStatsModal = function() { document.getElementById('stats-modal').style.display = 'none'; };
-
-        window.clearStatsLogs = function() {
-            if (!confirm('Полностью стереть историю статистики из облака?')) return;
-            dbStats = { totalRight: 0, totalWrong: 0, topics: {} };
-            saveToCloud();
-            window.openStatsModal();
-        };
+        }
+        function closeStatsModal() { document.getElementById('stats-modal').style.display = 'none'; }
+        function clearStatsLogs() {
+            if (!confirm('Стереть статистику?')) return;
+            window.dbStats = { totalRight: 0, totalWrong: 0, topics: {} }; window.saveToStorage(); openStatsModal();
+        }
     </script>
 </body>
 </html>
